@@ -49,7 +49,7 @@ function particulars(key) {
     <p>√承诺7天无效退款 √闪电发货 √免费技术支持 √免费升级 √支持开票</p>
     <a>选购Mac版本</a>
     <div class="flex-container">
-      <div class="flex-item visiHidd"></div>
+      <!-- <div class="flex-item visiHidd"></div> -->
       <div class="flex-item" v-for="item in state">
         <strong class="title">{{ item.title }}</strong><br>
         <strong class="title_price">{{ item.currentPrice }}</strong>&nbsp;
@@ -102,11 +102,15 @@ function particulars(key) {
 }
 
 .flex-container {
-  display: flex;
+  /* display: flex; */
   /* 设置为Flexbox布局 */
   width: 100%;
   /* height: 100%; */
   /* margin-left: 18%; */
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center;     /* 垂直居中 */
+  /* height: 100vh;  */
 }
 
 .flex-item {

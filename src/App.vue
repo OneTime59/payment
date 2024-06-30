@@ -1,24 +1,12 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import Payment from './views/Payment.vue'
-import Header from './components/Header.vue';
-import Footer from './components/Footer.vue';
-
-</script>
-
 <template>
-  <div class="global_css">
-    <el-container>
-      <el-header class="header">
-          <Header />
-      </el-header>
-      <el-main class="main">
-        <Payment />
-      </el-main>
-      <el-footer class="footer"><Footer /></el-footer>
-    </el-container>
-  </div>
+  <RouterView />
 </template>
+ 
+<script>
+export default {
+  name: 'App',
+};
+</script>
 
 <style scoped>
 html, body, div, span, applet, object, iframe,
