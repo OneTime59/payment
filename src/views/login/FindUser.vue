@@ -11,10 +11,10 @@
                     ref="ruleFormRef"
                 >
                     <el-form-item label="账号" prop="login_account">
-                        <el-input v-model="form.account" />
+                        <el-input v-model="form.login_account" @blur='queryProblem'/>
                     </el-form-item>
                     <el-form-item label="安全问题">
-                        <el-input v-model="form.secure_problem" />
+                        <el-input v-model="form.secure_problem" disabled/>
                     </el-form-item>
                     <el-form-item label="安全答案" prop="secure_answer">
                         <el-input v-model="form.secure_answer" />
@@ -38,6 +38,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { getQuestion, resetpwd } from '../../utils/api'
 
 const ruleFormRef = ref()
 const isLogin = ref(true)
@@ -84,8 +85,15 @@ const submitForm = async (formEl) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      console.log('submit!')
-      router.push('/login');
+      resetpwd({
+        user_name: form.login_account,
+        new_password: btoa(btoa(form.reset_password)),
+        answer_one: form.secure_problem,
+        question_one: form.secure_answer
+      }).then(res => {
+        ElMessage.success('修改成功！')
+        router.push('/login');
+      })
     } else {
       console.log('error submit!', fields)
     }
@@ -93,6 +101,15 @@ const submitForm = async (formEl) => {
 }
 const goBack = () => {
     router.push('/login');
+}
+const queryProblem = () => {
+  if(form.login_account){
+    getQuestion({
+      user_name: form.login_account
+    }).then(val => {
+      form.secure_problem = val.data;
+    })
+  }
 }
 </script>
 

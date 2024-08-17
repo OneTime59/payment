@@ -7,17 +7,17 @@
                     :model="form_register" 
                     :rules="rules_register" 
                     label-width="auto" 
-                    style="width: 100%"
+                    style="max-width: 600px"
                     ref="ruleFormRef_register"
                 >
                     <el-form-item label="账户" prop="register_name">
                         <el-input v-model="form_register.register_name" />
                     </el-form-item>
                     <el-form-item label="密码" prop="register_password">
-                        <el-input v-model="form_register.register_password" />
+                        <el-input v-model="form_register.register_password" placeholder="密码" type="password" show-password/>
                     </el-form-item>
                     <el-form-item label="确认密码" prop="register_password_confirm">
-                        <el-input v-model="form_register.register_password_confirm" />
+                        <el-input v-model="form_register.register_password_confirm" type="password" show-password/>
                     </el-form-item>
                     <el-form-item label="安全问题" prop="register_security">
                         <el-input v-model="form_register.register_security" />
@@ -38,6 +38,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { register } from '../../utils/api'
 
 const ruleFormRef_register = ref()
 const router = useRouter();
@@ -91,9 +92,23 @@ const submitFormRegister = async (formEl) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      console.log('submit!');
-      ElMessage.success('注册成功！')
-      router.push('/login');
+        if (form_register.register_password === form_register.register_password_confirm){
+            register({
+                user_name: form_register.register_name, // 用户名
+                password: btoa(btoa(form_register.register_password)), // 密码在此转码加密
+                question_one: form_register.register_security, // 问题
+                answer_one: form_register.register_answer // 密保
+            }).then(users => {
+                console.log(users);
+                ElMessage.success('注册成功！')
+                router.push('/login');
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        } else {
+            ElMessage.error('密码与确认密码不一致，请核对！')
+        }
     } else {
       console.log('error submit!', fields)
     }

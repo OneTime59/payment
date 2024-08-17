@@ -1,22 +1,35 @@
 <template>
     <div class="header_title">
         <el-row>
-            <el-col :span="12">
+            <el-col :span="9">
                 <div class="header_title_img">
-                    <img src="/liebiao.svg" class="header_img">
-                    <div>BIBICO</div>
+                    <img src="/bbkong.svg" class="header_img"/>
+                    <!-- <div>BIBICO</div> -->
                 </div>
             </el-col>
             <el-col :span="12">
                 <div class="header_title_r">科技改变生活. 便利比比皆是</div>
+            </el-col>
+            <el-col :span="3" class="center-text">
+                <el-button @click="logoutBun" round>退出</el-button>
             </el-col>
         </el-row>
     </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { logout } from '@/utils/api';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const logoutBun = () => {
+    logout({
+        access_token: localStorage.getItem('access_token')
+    }).then(res => {
+        router.push('/login');
+        localStorage.clear();
+    })
+}
 </script>
 
 <style scoped lang='scss'>
@@ -45,5 +58,8 @@ import { reactive, ref } from 'vue';
     align-items: center;
     justify-content: center;
     height: 100%;
+}
+.center-text {
+    text-align: center;
 }
 </style>

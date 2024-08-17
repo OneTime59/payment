@@ -13,8 +13,8 @@
                     <el-form-item label="账号" prop="login_name">
                         <el-input v-model="form.login_name" />
                     </el-form-item>
-                    <el-form-item label="安全问题" prop="login_password">
-                        <el-input v-model="form.login_password" />
+                    <el-form-item label="密码" prop="login_password">
+                        <el-input v-model="form.login_password" type="password" show-password/>
                     </el-form-item>
                     <el-form-item>
                         <el-radio-group v-model="form.login_isRemember">
@@ -37,7 +37,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { getUsers } from '../../utils/api'
+import { login } from '../../utils/api'
 
 const ruleFormRef = ref()
 const router = useRouter();
@@ -68,9 +68,13 @@ const submitForm = async (formEl) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      console.log('submit!')
-      getUsers().then(users => {
-            console.log(users);
+      login({
+        user_name: form.login_name,
+        password: btoa(btoa(form.login_password))
+      }).then(users => {
+            console.log(users, '登录成功');
+            localStorage.setItem('access_token', users.access_token);
+            router.push('/payment');
         })
         .catch(error => {
             console.error(error);
@@ -99,6 +103,7 @@ const forgotPassword = () => {
     /* 垂直居中 */
     height: 100vh;
     background-color: #D9D9D9;
+    // background-image: url('../../../pubilc/login_back.svg')
     // opacity: 0.5;
     .login_inlet {
         width: 40vw;

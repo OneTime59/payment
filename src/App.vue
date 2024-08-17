@@ -65,4 +65,7 @@ table {
   height: 30vh;
   width: 100vw;
 }
+.el-header {
+  padding: 0px !important; /* 使用 !important 可以确保覆盖其他样式 */
+}
 </style>

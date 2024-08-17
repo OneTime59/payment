@@ -6,9 +6,9 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'login',
-      redirect: '/login',
-      component: Login
+      // name: 'HomePage',
+      redirect: '/HomePage',
+      // component: HomePage
     },
     {
       path: '/login',
@@ -29,6 +29,11 @@ const router = createRouter({
       path: '/payment',
       name: 'payment',
       component: () => import('../views/Payment/index.vue')
+    },
+    {
+      path: '/HomePage',
+      name: 'HomePage',
+      component: () => import('../views/homePage/HomePage.vue')
     }
   ]
 })

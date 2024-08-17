@@ -27,11 +27,14 @@ const state = reactive([
 const activities = [
   {
     content: '第一步：扫码支付',
+    key: 0,
   },
   {
     content: '第二步：购买成功',
+    key: 1
   },
 ]
+const active = ref(0);
 const dialogVisible = ref(false)
 const purchasePrice = reactive({
   ageing: '12个月',
@@ -69,14 +72,9 @@ function particulars(key) {
     </div>
   </div>
   <el-dialog v-model="dialogVisible" title="支付" width="800">
-    <el-timeline class="horizontal-timeline">
-      <el-timeline-item v-for="(activity, index) in activities" :key="index" :center="false">
-        <div class="timeline-content">
-          {{ activity.content }}
-        </div>
-        <!-- {{ activity.content }} -->
-      </el-timeline-item>
-    </el-timeline>
+    <el-steps style="width: 50%" :active="active" finish-status="success" align-center>
+      <el-step v-for="(activity, index) in activities" :key="index" :title="activity.content" :status="activity.key"/>
+    </el-steps>
     <div class="particulars">
       <div>XX软件（window）</div>
       <div>{{purchasePrice.ageing}}有效1台电脑</div>
