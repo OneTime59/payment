@@ -29,6 +29,11 @@ export default defineConfig({
         target: 'http://175.178.70.235:8808',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api/v1/auth')
+      },
+      '/payment': {
+        target: 'http://175.178.70.235:8808',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/payment/, '/api/v1/pay/alipay')
       }
     }
   }
