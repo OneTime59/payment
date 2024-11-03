@@ -1,27 +1,40 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue';
+import { getVipInfo, getPaymentPage, getPaymentResult } from '@/utils/api'
+import { generateRandomId } from '@/common';
+import { useUserStore } from '@/stores/counter';  
+import { storeToRefs } from 'pinia';  
+  
+const userStore = useUserStore();  
 
 const state = reactive([
   {
-    title: '月度套餐',
+    title: '图片增强',
+    titleEn: 'photo_enhancer',
+    // 1：一个月有效  2:三个月有效，季度   3：半年有效  4：一年有效  5：永久有效
+    lifespan: '1',
     currentPrice: '19.00', // 现价
     originalPrice: '30.00', // 原价
     timeLimit: '1个月',
-    key: '1'
+    key: '10010001'
   },
   {
-    title: '季度套餐',
+    title: '视频下载',
+    titleEn: 'video_downloader',
+    lifespan: '4',
     currentPrice: '198.00', // 现价
     originalPrice: '365.00', // 原价
     timeLimit: '1年',
-    key: '2'
+    key: '10010002'
   },
   {
-    title: '终身套餐',
+    title: '图文生成',
+    titleEn: 'ai_photo',
+    lifespan: '5',
     currentPrice: '398.00', // 现价
     originalPrice: '708.00', // 原价
     timeLimit: '终身',
-    key: '3'
+    key: '10010003'
   }
 ])
 const activities = [
@@ -34,16 +47,72 @@ const activities = [
     key: 1
   },
 ]
-const active = ref(0);
+const active = ref(1);
+const PaymentResultCon = ref(0);
+const paymentProgress = ref(true);
+const paymentUrl = ref('');
+const generateRandomId32 = ref('');
 const dialogVisible = ref(false)
+const purchaseLoding = ref(false)
 const purchasePrice = reactive({
   ageing: '12个月',
   price: '168.00',
 })
 
-function particulars(key) {
-  this.dialogVisible = true;
+onMounted(async () => {  
+  initUserInfo();
+});
+
+function initUserInfo(){
+  getVipInfo({
+    access_token: atob(atob(localStorage.getItem('access_token')))
+  }).then(users => {
+    const { remaining_time } = JSON.parse(users.data);
+    userStore.setUserTime(remaining_time);
+    })
 }
+
+function particulars({titleEn, lifespan, key}) {
+  generateRandomId32.value = generateRandomId();
+  PaymentResultCon.value = 0;
+  getPaymentPage({
+    product_name: titleEn,
+    product_id: key,
+    available_type: lifespan,
+    pay_id: generateRandomId32.value,
+    access_token: atob(atob(localStorage.getItem('access_token'))),
+  }).then(users => {
+    this.dialogVisible = true;
+    const { url } = JSON.parse(users.data);
+    paymentProgress.value = false;
+    // userStore.setUserPaymentUrl(url);
+    // userStore.setUserIsProgress(true);
+    window.open(url, '_blank'); // '_blank' 表示在新标签页中打开
+    purchaseLoding.value = true;
+    query();
+    }).catch(error => {
+        console.error(error);
+    }); 
+}
+
+function query() {
+  PaymentResultCon.value < 120 && dialogVisible.value ? setTimeout(() => {
+    getPaymentResult({
+    pay_id: generateRandomId32.value
+  }).then(users => {
+    active.value = 2;
+    purchaseLoding.value = false;
+    initUserInfo();
+    userStore.userIsProgress = false;
+    }).catch(error => {
+        console.error(error, '等待支付！');
+        PaymentResultCon.value++
+        query(); // 等待支付成功
+    });
+  }, 1000) : console.log('支付结果查询已取消');
+  
+}
+
 </script>
 
 <template>
@@ -61,7 +130,7 @@ function particulars(key) {
         <div class="limit">√1台电脑</div>
         <!-- <el-icon><ShoppingCart /></el-icon> -->
         <el-button type="primary" size="large" :style="{ 'width': '200px' }" round
-          @click="particulars(item.key)"><el-icon>
+          @click="particulars(item)"><el-icon>
             <ShoppingCart />
           </el-icon>&nbsp;<p>立即购买</p></el-button>
         <p>支持付款的方式</p>
@@ -70,21 +139,23 @@ function particulars(key) {
         </div>
       </div>
     </div>
-  </div>
-  <el-dialog v-model="dialogVisible" title="支付" width="800">
+    <el-dialog v-model="dialogVisible" title="支付" width="800">
     <el-steps style="width: 50%" :active="active" finish-status="success" align-center>
-      <el-step v-for="(activity, index) in activities" :key="index" :title="activity.content" :status="activity.key"/>
+      <el-step v-for="(activity, index) in activities" :key="index" :title="activity.content"/>
     </el-steps>
     <div class="particulars">
       <div>XX软件（window）</div>
       <div>{{purchasePrice.ageing}}有效1台电脑</div>
-      <div>应付金额：￥<strong :style="{color: '#FF9000', 'font-size': 18+'px'}">{{ purchasePrice.price }}</strong></div>
-      <p>距离二维码过期还有299秒</p>
-      <div class="QR_code">二维码</div>
+      <div>金额：￥<strong :style="{color: '#FF9000', 'font-size': 18+'px'}">{{ purchasePrice.price }}</strong></div>
+      <strong v-if="purchaseLoding">请进入支付界面进行支付操作</strong>
+      <div class="QR_code" v-loading="purchaseLoding" v-if="purchaseLoding"></div>
+      <img src="/public/purchaseok.png" alt="支付成功！" v-if="!purchaseLoding">
+      <strong v-if="!purchaseLoding">支付成功！</strong>
       <img src="/public/zhifuleixing.svg">
       <p>在过程中遇到问题，请联系在线客服>></p>
     </div>
   </el-dialog>
+  </div>
 </template>
 
 <style scoped>
@@ -158,7 +229,7 @@ function particulars(key) {
   .QR_code{
     width: 200px;
     height: 200px;
-    background: pink;
+    /* background: pink; */
   }
 }
 /* .horizontal-timeline {

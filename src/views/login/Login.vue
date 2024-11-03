@@ -38,6 +38,10 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { login } from '../../utils/api'
+import { useUserStore } from '@/stores/counter';  
+import { storeToRefs } from 'pinia';  
+  
+const userStore = useUserStore();  
 
 const ruleFormRef = ref()
 const router = useRouter();
@@ -66,14 +70,15 @@ const rules = reactive({
 // 提交
 const submitForm = async (formEl) => {
   if (!formEl) return
+  userStore.setUserTime('0')
   await formEl.validate((valid, fields) => {
     if (valid) {
       login({
         user_name: form.login_name,
         password: btoa(btoa(form.login_password))
       }).then(users => {
-            console.log(users, '登录成功');
-            localStorage.setItem('access_token', users.access_token);
+        // 转义两次对token进行前端加密
+            localStorage.setItem('access_token', btoa(btoa(users.access_token)));
             router.push('/payment');
         })
         .catch(error => {

@@ -1,12 +1,22 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
-
-export const useCounterStore = defineStore('counter', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
-
-  return { count, doubleCount, increment }
-})
+import { defineStore } from 'pinia';  
+  
+export const useUserStore = defineStore('userInfo', {  
+  state: () => ({  
+    userTime: '0',  
+    userPaymentUrl:'',
+    userIsProgress: true,
+    userName: '李四'
+  }),  
+  actions: {  
+    setUserTime(time) {  
+      this.userTime = time;
+    },  
+    setUserPaymentUrl(url) {
+      this.userPaymentUrl = url;
+    },
+    setUserIsProgress(progress){
+      this.userIsProgress = progress;
+    }
+    // ... 其他actions  
+  }, 
+});
