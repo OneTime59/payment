@@ -55,6 +55,7 @@ const generateRandomId32 = ref('');
 const dialogVisible = ref(false)
 const purchaseLoding = ref(false)
 const purchasePrice = reactive({
+  title: '',
   ageing: '12个月',
   price: '168.00',
 })
@@ -72,9 +73,12 @@ function initUserInfo(){
     })
 }
 
-function particulars({titleEn, lifespan, key}) {
+function particulars({title, timeLimit, titleEn, currentPrice, lifespan, key}) {
   generateRandomId32.value = generateRandomId();
   PaymentResultCon.value = 0;
+  purchasePrice.title = title;
+  purchasePrice.ageing = timeLimit;
+  purchasePrice.price = currentPrice;
   getPaymentPage({
     product_name: titleEn,
     product_id: key,
@@ -144,8 +148,8 @@ function query() {
       <el-step v-for="(activity, index) in activities" :key="index" :title="activity.content"/>
     </el-steps>
     <div class="particulars">
-      <div>XX软件（window）</div>
-      <div>{{purchasePrice.ageing}}有效1台电脑</div>
+      <div>{{ purchasePrice.title }}</div>
+      <div>{{ purchasePrice.ageing }}有效1台电脑</div>
       <div>金额：￥<strong :style="{color: '#FF9000', 'font-size': 18+'px'}">{{ purchasePrice.price }}</strong></div>
       <strong v-if="purchaseLoding">请进入支付界面进行支付操作</strong>
       <div class="QR_code" v-loading="purchaseLoding" v-if="purchaseLoding"></div>
