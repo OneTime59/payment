@@ -11,7 +11,7 @@
                     ref="ruleFormRef"
                 >
                     <el-form-item label="账号" prop="login_name">
-                        <el-input v-model="form.login_name" />
+                        <el-input v-model="form.login_name" @blur="loginUserBlur"/>
                     </el-form-item>
                     <el-form-item label="密码" prop="login_password">
                         <el-input v-model="form.login_password" type="password" show-password/>
@@ -70,7 +70,13 @@ const rules = reactive({
 // 提交
 const submitForm = async (formEl) => {
   if (!formEl) return
-  userStore.setUserTime('0')
+  userStore.setUserTime('0');
+  console.log('检测数据登录', typeof form.login_isRemember);
+  if (form.login_isRemember === 1) {
+    let loginUser = JSON.parse(localStorage.getItem('loginPaymentUser')) || {};
+    loginUser[form.login_name] = form.login_password;
+    localStorage.setItem("loginPaymentUser", JSON.stringify(loginUser))
+  }
   await formEl.validate((valid, fields) => {
     if (valid) {
       login({
@@ -88,6 +94,11 @@ const submitForm = async (formEl) => {
       console.log('error submit!', fields)
     }
   })
+}
+// 判断是否记住密码 反显
+const loginUserBlur = () => {
+    let loginUser = JSON.parse(localStorage.getItem('loginPaymentUser')) || {};
+    form.login_password = loginUser[form.login_name];
 }
 // 进入注册
 const registerUser = () => {
